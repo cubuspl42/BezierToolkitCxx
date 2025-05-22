@@ -1,16 +1,54 @@
+#include "CubicBezierCurve.h"
+
 #include <iostream>
 
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-int main() {
-    // TIP Press <shortcut actionId="RenameElement"/> when your caret is at the <b>lang</b> variable name to see how CLion can help you rename it.
-    auto lang = "C++";
-    std::cout << "Hello and welcome to " << lang << "!\n";
+#include <benchmark/benchmark.h>
 
-    for (int i = 1; i <= 5; i++) {
-        // TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        std::cout << "i = " << i << std::endl;
+const auto cubicBezierCurve =
+    CubicBezierCurve(Vector2(530.4940814557458, 241.67258884541297),
+                     Vector2(961.5421048139829, 329.8998894073666),
+                     Vector2(236.94848087916398, 6.644895194057426),
+                     Vector2(476.141458980871, 199.36056001431643)
+
+    );
+
+static void
+BM_CubicBezierCurve_calculateTotalArcLength(benchmark::State &state) {
+    for (const auto _ : state) {
+        (void)cubicBezierCurve.calculateTotalArcLength();
     }
-
-    return 0;
-    // TIP See CLion help at <a href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>. Also, you can try interactive lessons for CLion by selecting 'Help | Learn IDE Features' from the main menu.
 }
+
+BENCHMARK(BM_CubicBezierCurve_calculateTotalArcLength);
+
+static void
+BM_CubicBezierCurve_calculateTotalArcLengthNaively(benchmark::State &state) {
+    for (const auto _ : state) {
+        (void)cubicBezierCurve.calculateTotalArcLengthNaively();
+    }
+}
+
+BENCHMARK(BM_CubicBezierCurve_calculateTotalArcLengthNaively);
+
+const auto quadraticBezierBinomial = QuadraticBezierCurve(
+    Vector2(0.0, 0.0), Vector2(100.0, 200.0), Vector2(200.0, 0.0));
+
+static void
+BM_QuadraticBezierCurve_calculateTotalArcLength(benchmark::State &state) {
+    for (const auto _ : state) {
+        (void)quadraticBezierBinomial.calculateTotalArcLength();
+    }
+}
+
+BENCHMARK(BM_QuadraticBezierCurve_calculateTotalArcLength);
+
+static void BM_QuadraticBezierCurve_calculateTotalArcLengthNaively(
+    benchmark::State &state) {
+    for (const auto _ : state) {
+        (void)quadraticBezierBinomial.calculateTotalArcLengthNaively();
+    }
+}
+
+BENCHMARK(BM_QuadraticBezierCurve_calculateTotalArcLengthNaively);
+
+BENCHMARK_MAIN();
