@@ -8,6 +8,10 @@
 
 #include <utility>
 
+constexpr int defaultNaiveSegmentCount = 64;
+
+constexpr int defaultLoweringSegmentCount = 12;
+
 class CubicBezierCurve {
   public:
     CubicBezierCurve(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2,
@@ -23,24 +27,18 @@ class CubicBezierCurve {
     [[nodiscard]] const Vector2 &point3() const { return point3_; }
 
     [[nodiscard]] Vector4 getXVector() const {
-        return Vector4(point0_.x(), point1_.x(), point2_.x(), point3_.x());
+        return {point0_.x(), point1_.x(), point2_.x(), point3_.x()};
     }
 
     [[nodiscard]] Vector4 getYVector() const {
-        return Vector4(point0_.y(), point1_.y(), point2_.y(), point3_.y());
+        return {point0_.y(), point1_.y(), point2_.y(), point3_.y()};
     }
 
-    [[nodiscard]] LineSegment getSegment0() const {
-        return LineSegment(point0_, point1_);
-    }
+    [[nodiscard]] LineSegment getSegment0() const { return {point0_, point1_}; }
 
-    [[nodiscard]] LineSegment getSegment1() const {
-        return LineSegment(point1_, point2_);
-    }
+    [[nodiscard]] LineSegment getSegment1() const { return {point1_, point2_}; }
 
-    [[nodiscard]] LineSegment getSegment2() const {
-        return LineSegment(point2_, point3_);
-    }
+    [[nodiscard]] LineSegment getSegment2() const { return {point2_, point3_}; }
 
     [[nodiscard]] Vector2 evaluate(double t) const;
 
@@ -53,13 +51,17 @@ class CubicBezierCurve {
 
     [[nodiscard]] QuadraticBezierCurve lower() const;
 
-    [[nodiscard]] double calculateTotalArcLengthNaively() const;
+    [[nodiscard]] double calculateTotalArcLengthNaively(
+        int segmentCount = defaultNaiveSegmentCount) const;
 
-    [[nodiscard]] double calculateTotalArcLength() const;
+    [[nodiscard]] double calculateTotalArcLength(
+        int segmentCount = defaultLoweringSegmentCount) const;
 
-    [[nodiscard]] double calculateArcLengthUpToNaively(double t) const;
+    [[nodiscard]] double calculateArcLengthUpToNaively(
+        double t, int segmentCount = defaultNaiveSegmentCount) const;
 
-    [[nodiscard]] double calculateArcLengthUpTo(double t) const;
+    [[nodiscard]] double calculateArcLengthUpTo(
+        double t, int segmentCount = defaultLoweringSegmentCount) const;
 
   private:
     Vector2 point0_, point1_, point2_, point3_;

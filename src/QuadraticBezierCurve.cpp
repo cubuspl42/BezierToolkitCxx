@@ -13,7 +13,7 @@ LineSegment QuadraticBezierCurve::linearlyInterpolate(const double t) const {
     const auto point0 = getSegment0().evaluate(t);
     const auto point1 = getSegment1().evaluate(t);
 
-    return LineSegment(point0, point1);
+    return {point0, point1};
 }
 
 double QuadraticBezierCurve::calculateTotalArcLengthNaively() const {

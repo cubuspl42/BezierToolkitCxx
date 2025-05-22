@@ -4,7 +4,7 @@
 
 #include <benchmark/benchmark.h>
 
-const auto cubicBezierCurve =
+const auto loopCubicBezierCurve =
     CubicBezierCurve(Vector2(530.4940814557458, 241.67258884541297),
                      Vector2(961.5421048139829, 329.8998894073666),
                      Vector2(236.94848087916398, 6.644895194057426),
@@ -15,7 +15,7 @@ const auto cubicBezierCurve =
 static void
 BM_CubicBezierCurve_calculateTotalArcLength(benchmark::State &state) {
     for (const auto _ : state) {
-        (void)cubicBezierCurve.calculateTotalArcLength();
+        (void)loopCubicBezierCurve.calculateTotalArcLength();
     }
 }
 
@@ -24,7 +24,7 @@ BENCHMARK(BM_CubicBezierCurve_calculateTotalArcLength);
 static void
 BM_CubicBezierCurve_calculateTotalArcLengthNaively(benchmark::State &state) {
     for (const auto _ : state) {
-        (void)cubicBezierCurve.calculateTotalArcLengthNaively();
+        (void)loopCubicBezierCurve.calculateTotalArcLengthNaively();
     }
 }
 

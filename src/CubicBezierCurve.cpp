@@ -27,7 +27,7 @@ CubicBezierCurve::linearlyInterpolate(const double t) const {
     const auto point1 = getSegment1().evaluate(t);
     const auto point2 = getSegment2().evaluate(t);
 
-    return QuadraticBezierCurve(point0, point1, point2);
+    return {point0, point1, point2};
 }
 
 std::pair<CubicBezierCurve, CubicBezierCurve>
@@ -64,19 +64,40 @@ QuadraticBezierCurve CubicBezierCurve::lower() const {
     const auto loweredPoint2 =
         Vector2(loweringVector2.dot(xVector), loweringVector2.dot(yVector));
 
-    return QuadraticBezierCurve(loweredPoint0, loweredPoint1, loweredPoint2);
+    return {loweredPoint0, loweredPoint1, loweredPoint2};
 }
 
-double CubicBezierCurve::calculateTotalArcLengthNaively() const {
-    return calculateArcLengthUpToNaively(1.0);
+double
+CubicBezierCurve::calculateTotalArcLengthNaively(const int segmentCount) const {
+    return calculateArcLengthUpToNaively(1.0, segmentCount);
 }
 
-double CubicBezierCurve::calculateTotalArcLength() const {
-    return calculateArcLengthUpTo(1.0);
+double CubicBezierCurve::calculateTotalArcLength(const int segmentCount) const {
+    auto mutableTotalLength = 0.0;
+    auto mutableRemainingCurve = *this;
+
+    for (auto i = 0; i < segmentCount - 1; ++i) {
+        const auto j = segmentCount - i;
+        const auto t = 1.0 / static_cast<double>(j);
+
+        const auto [trimmedCurve, newRemainingCurve] =
+            mutableRemainingCurve.splitAt(t);
+
+        const auto loweredCurve = trimmedCurve.lower();
+
+        mutableTotalLength += loweredCurve.calculateTotalArcLength();
+        mutableRemainingCurve = newRemainingCurve;
+    }
+
+    mutableTotalLength +=
+        mutableRemainingCurve.lower().calculateTotalArcLength();
+
+    return mutableTotalLength;
 }
 
-double CubicBezierCurve::calculateArcLengthUpToNaively(const double t) const {
-    static constexpr int segmentCount = 32;
+double
+CubicBezierCurve::calculateArcLengthUpToNaively(const double t,
+                                                const int segmentCount) const {
     const auto linSpace = LinSpace(0.0, t, segmentCount);
 
     auto mutablePreviousPoint = evaluate(0.0);
@@ -96,24 +117,9 @@ double CubicBezierCurve::calculateArcLengthUpToNaively(const double t) const {
     return mutableTotalLength;
 }
 
-double CubicBezierCurve::calculateArcLengthUpTo(const double t) const {
-    static constexpr int segmentCount = 9;
-    const auto linSpace = LinSpace(0.0, t, segmentCount);
+double CubicBezierCurve::calculateArcLengthUpTo(const double t,
+                                                const int segmentCount) const {
+    const auto [subCurve, _] = splitAt(t);
 
-    auto mutablePreviousT = 0.0;
-    auto mutableTotalLength = 0.0;
-
-    for (auto i = 1; i <= segmentCount; ++i) {
-        const auto startT = mutablePreviousT;
-        const auto endT = linSpace.getSample(i);
-
-        const auto trimmedCurve = trim(Range(startT, endT));
-        const auto loweredCurve = trimmedCurve.lower();
-
-        mutableTotalLength += loweredCurve.calculateTotalArcLength();
-
-        mutablePreviousT = endT;
-    }
-
-    return mutableTotalLength;
+    return subCurve.calculateTotalArcLength(segmentCount);
 }
